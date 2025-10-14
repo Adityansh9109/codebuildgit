@@ -5,7 +5,7 @@ env:
     OWNER_NAME: "Adityansh9109"          # GitHub org name or your username
     REPO_NAME: "codebuild1" # Desired repo name
   secrets-manager:
-    GITHUB_TOKEN: "GITHUB_ACCESS"  # JSON key inside secret
+    GITHUB_TOKEN: "myapp/github-token:GITHUB_TOKEN"  # JSON key inside secret
 
 phases:
   install:
