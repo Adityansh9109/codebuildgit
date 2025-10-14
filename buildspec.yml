@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    ORG_NAME: "Adityansh9109"         # Replace with your GitHub organization
+    ORG_NAME: "SampleorgAditya"         # Replace with your GitHub organization
     REPO_NAME: "codebuild1"       # Replace with the desired repo name
   secrets-manager:
     GITHUB_TOKEN: "myapp/github-token:GITHUB_TOKEN"  # JSON key inside secret
