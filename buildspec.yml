@@ -2,8 +2,8 @@ version: 0.2
 
 env:
   variables:
-    ORG_NAME: "SampleorgAditya"         # Replace with your GitHub organization
-    REPO_NAME: "codebuild1"       # Replace with the desired repo name
+    OWNER_NAME: "Adityansh9109"          # GitHub org name or your username
+    REPO_NAME: "codebuild1" # Desired repo name
   secrets-manager:
     GITHUB_TOKEN: "myapp/github-token:GITHUB_TOKEN"  # JSON key inside secret
 
@@ -12,7 +12,7 @@ phases:
     runtime-versions:
       python: 3.11
     commands:
-      - echo "Upgrading pip and installing dependencies..."
+      - echo "Installing dependencies..."
       - pip install --upgrade pip
       - pip install PyGithub
 
