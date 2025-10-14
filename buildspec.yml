@@ -1,8 +1,8 @@
 version: 0.2
 env:
   variables:
-    OWNER_NAME: "YourOrgName"              # Organization name
-    REPO_NAME: "codebuild1"
+    OWNER_NAME: "Adityansh9109"              # Organization name
+    REPO_NAME: "codebuild3"
     BRANCH_NAMES: "dev,qa"                 # Branches to create
     USERS: "AdityanshShamra"             # GitHub usernames
   secrets-manager:
