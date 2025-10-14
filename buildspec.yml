@@ -1,0 +1,25 @@
+version: 0.2
+
+env:
+  variables:
+    ORG_NAME: "your-org-name"
+    REPO_NAME: "new-repo-name"
+  secrets-manager:
+    GITHUB_TOKEN: "myapp/github-token"  # Replace with your Secrets Manager key
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo "Installing dependencies..."
+      - pip install PyGithub
+
+  build:
+    commands:
+      - echo "Running GitHub repository creation script..."
+      - python create_repo.py
+
+  post_build:
+    commands:
+      - echo "Repository creation completed."
