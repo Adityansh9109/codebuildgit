@@ -1,50 +1,65 @@
 #!/usr/bin/env python3
 """
-Creates a new GitHub repository inside an organization.
-Designed to run in AWS CodeBuild.
+Creates a new GitHub repository either in a user account or organization.
+Designed to run inside AWS CodeBuild.
 
 Requirements:
     pip install PyGithub
 
-Environment Variables (from CodeBuild):
-    GITHUB_TOKEN - GitHub Personal Access Token (from Secrets Manager, key "GITHUB_TOKEN")
-    ORG_NAME     - GitHub organization name
+Environment Variables:
+    GITHUB_TOKEN - GitHub Personal Access Token (from Secrets Manager)
+    OWNER_NAME   - GitHub organization name OR user login
     REPO_NAME    - Name of the new repository
 """
 
 import os
 from github import Github, Auth
+from github.GithubException import GithubException
 
 def main():
     github_token = os.getenv("GITHUB_TOKEN")
-    org_name = os.getenv("ORG_NAME")
+    owner_name = os.getenv("OWNER_NAME")
     repo_name = os.getenv("REPO_NAME")
 
-    if not all([github_token, org_name, repo_name]):
-        print("❌ Missing required environment variables: GITHUB_TOKEN, ORG_NAME, REPO_NAME")
+    if not all([github_token, owner_name, repo_name]):
+        print("❌ Missing environment variables: GITHUB_TOKEN, OWNER_NAME, REPO_NAME")
         return
 
-    print(f"🔐 Connecting to GitHub organization: {org_name}")
-    g = Github(auth=Auth.Token(github_token))  # Correct authentication
+    print(f"🔐 Connecting to GitHub with token...")
+    g = Github(auth=Auth.Token(github_token))
 
+    # Try as organization first
     try:
-        org = g.get_organization(org_name)
-    except Exception as e:
-        print(f"❌ Failed to access organization '{org_name}': {e}")
+        owner = g.get_organization(owner_name)
+        owner_type = "organization"
+        print(f"✅ Owner detected as organization: {owner_name}")
+    except GithubException:
+        try:
+            owner = g.get_user(owner_name)
+            owner_type = "user"
+            print(f"✅ Owner detected as user: {owner_name}")
+        except GithubException as e:
+            print(f"❌ Failed to access owner '{owner_name}': {e.data if hasattr(e,'data') else e}")
+            return
+
+    # Check if repo already exists
+    existing_repos = [r.name for r in owner.get_repos()]
+    if repo_name in existing_repos:
+        print(f"⚠️ Repository '{repo_name}' already exists under {owner_type} '{owner_name}'. Skipping creation.")
         return
 
+    # Create repository
     try:
-        print(f"🚀 Creating new repository: {repo_name}")
-        repo = org.create_repo(
+        repo = owner.create_repo(
             name=repo_name,
             description=f"Repository '{repo_name}' created automatically via CodeBuild script.",
             private=True,
-            auto_init=True  # Creates README.md
+            auto_init=True
         )
-        print(f"✅ Repository '{repo_name}' created successfully in org '{org_name}'")
+        print(f"🚀 Repository '{repo_name}' created successfully under {owner_type} '{owner_name}'")
         print(f"🔗 Repository URL: {repo.html_url}")
-    except Exception as e:
-        print(f"❌ Failed to create repository: {e}")
+    except GithubException as e:
+        print(f"❌ Failed to create repository: {e.data if hasattr(e,'data') else e}")
 
 if __name__ == "__main__":
     main()
