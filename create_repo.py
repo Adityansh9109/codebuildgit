@@ -7,7 +7,7 @@ Requirements:
     pip install PyGithub
 
 Environment Variables (required):
-    GITHUB_TOKEN  - gittoken
+    GITHUB_TOKEN  - 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
     ORG_NAME      - Adityansh9109
     REPO_NAME     - democodebuild1
 """
