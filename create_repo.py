@@ -332,7 +332,7 @@ def main():
         repo = target.create_repo(
             name=repo_name,
             description=f"Repository '{repo_name}' created automatically via CodeBuild script.",
-            private=True,
+            private=False,
             auto_init=True
         )
         print(f"🚀 Repository '{repo_name}' created successfully under {owner_type} '{owner_name}'")
