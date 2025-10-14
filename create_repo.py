@@ -12,8 +12,54 @@ Environment Variables:
     REPO_NAME    - Name of the new repository
 """
 import os
+import time
 from github import Github, Auth
 from github.GithubException import GithubException
+
+def create_branches(repo):
+    """
+    Creates additional branches in the repository.
+    Default branches: dev, staging, production
+    """
+    # Get branch names from environment variable or use defaults
+    branch_names_env = os.getenv("BRANCH_NAMES", "dev,staging,production")
+    branch_names = [b.strip() for b in branch_names_env.split(",") if b.strip()]
+    
+    if not branch_names:
+        print("⚠️ No additional branches to create")
+        return
+    
+    print(f"\n🌿 Creating branches: {', '.join(branch_names)}")
+    
+    try:
+        # Get the default branch (usually 'main' or 'master')
+        default_branch = repo.default_branch
+        source_branch = repo.get_branch(default_branch)
+        source_sha = source_branch.commit.sha
+        
+        print(f"📌 Using '{default_branch}' (SHA: {source_sha[:7]}) as base branch")
+        
+        # Wait a moment for repo initialization to complete
+        time.sleep(2)
+        
+        # Create each branch
+        for branch_name in branch_names:
+            try:
+                repo.create_git_ref(
+                    ref=f"refs/heads/{branch_name}",
+                    sha=source_sha
+                )
+                print(f"  ✅ Branch '{branch_name}' created successfully")
+            except GithubException as e:
+                if e.status == 422:
+                    print(f"  ⚠️ Branch '{branch_name}' already exists")
+                else:
+                    print(f"  ❌ Failed to create branch '{branch_name}': {e.data if hasattr(e,'data') else e}")
+        
+        print(f"🎉 Branch creation completed!")
+        
+    except GithubException as e:
+        print(f"❌ Error during branch creation: {e.data if hasattr(e,'data') else e}")
 
 def main():
     github_token = os.getenv("GITHUB_TOKEN")
@@ -71,6 +117,10 @@ def main():
         )
         print(f"🚀 Repository '{repo_name}' created successfully under {owner_type} '{owner_name}'")
         print(f"🔗 Repository URL: {repo.html_url}")
+        
+        # Create additional branches
+        create_branches(repo)
+        
     except GithubException as e:
         print(f"❌ Failed to create repository: {e.data if hasattr(e,'data') else e}")
 
