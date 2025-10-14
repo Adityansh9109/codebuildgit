@@ -8,8 +8,8 @@ Requirements:
 
 Environment Variables (from CodeBuild):
     GITHUB_TOKEN - GitHub Personal Access Token (from Secrets Manager, key "GITHUB_TOKEN")
-    ORG_NAME     - Adityansh9109
-    REPO_NAME    - codebuild1
+    ORG_NAME     - GitHub organization name
+    REPO_NAME    - Name of the new repository
 """
 
 import os
