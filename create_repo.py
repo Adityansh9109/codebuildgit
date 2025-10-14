@@ -11,7 +11,6 @@ Environment Variables:
     OWNER_NAME   - GitHub organization name OR user login
     REPO_NAME    - Name of the new repository
 """
-
 import os
 from github import Github, Auth
 from github.GithubException import GithubException
@@ -27,30 +26,44 @@ def main():
 
     print(f"🔐 Connecting to GitHub with token...")
     g = Github(auth=Auth.Token(github_token))
-
+    
+    # Get authenticated user
+    authenticated_user = g.get_user()
+    
     # Try as organization first
     try:
         owner = g.get_organization(owner_name)
         owner_type = "organization"
         print(f"✅ Owner detected as organization: {owner_name}")
+        target = owner
     except GithubException:
         try:
             owner = g.get_user(owner_name)
             owner_type = "user"
             print(f"✅ Owner detected as user: {owner_name}")
+            
+            # For user accounts, we need to use the authenticated user
+            if owner.login != authenticated_user.login:
+                print(f"❌ Cannot create repository for user '{owner_name}' - token belongs to '{authenticated_user.login}'")
+                return
+            
+            target = authenticated_user  # Use authenticated user for repo creation
         except GithubException as e:
             print(f"❌ Failed to access owner '{owner_name}': {e.data if hasattr(e,'data') else e}")
             return
 
     # Check if repo already exists
-    existing_repos = [r.name for r in owner.get_repos()]
-    if repo_name in existing_repos:
-        print(f"⚠️ Repository '{repo_name}' already exists under {owner_type} '{owner_name}'. Skipping creation.")
-        return
+    try:
+        existing_repos = [r.name for r in target.get_repos()]
+        if repo_name in existing_repos:
+            print(f"⚠️ Repository '{repo_name}' already exists under {owner_type} '{owner_name}'. Skipping creation.")
+            return
+    except GithubException as e:
+        print(f"⚠️ Could not check existing repositories: {e.data if hasattr(e,'data') else e}")
 
     # Create repository
     try:
-        repo = owner.create_repo(
+        repo = target.create_repo(
             name=repo_name,
             description=f"Repository '{repo_name}' created automatically via CodeBuild script.",
             private=True,
