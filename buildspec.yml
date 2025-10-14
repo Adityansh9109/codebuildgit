@@ -4,7 +4,8 @@ env:
   variables:
     OWNER_NAME: "Adityansh9109"          # GitHub org name or your username
     REPO_NAME: "codebuild2" # Desired repo name
-    BRANCH_NAMES: "dev,staging,production"
+    BRANCH_NAMES: "dev,qa"
+     USERS: "AdityanshShamra"
   secrets-manager:
     GITHUB_TOKEN: "myapp/github-token:GITHUB_TOKEN"  # JSON key inside secret
 
