@@ -2,24 +2,25 @@ version: 0.2
 
 env:
   variables:
-    ORG_NAME: "your-org-name"
-    REPO_NAME: "new-repo-name"
+    ORG_NAME: "Adityansh9109"         # Replace with your GitHub organization
+    REPO_NAME: "codebuild1"       # Replace with the desired repo name
   secrets-manager:
-    GITHUB_TOKEN: "myapp/github-token"  # Replace with your Secrets Manager key
+    GITHUB_TOKEN: "myapp/github-token:GITHUB_TOKEN"  # JSON key inside secret
 
 phases:
   install:
     runtime-versions:
       python: 3.11
     commands:
-      - echo "Installing dependencies..."
+      - echo "Upgrading pip and installing dependencies..."
+      - pip install --upgrade pip
       - pip install PyGithub
 
   build:
     commands:
-      - echo "Running GitHub repository creation script..."
+      - echo "Running create_repo.py..."
       - python create_repo.py
 
   post_build:
     commands:
-      - echo "Repository creation completed."
+      - echo "✅ Repository creation completed."
