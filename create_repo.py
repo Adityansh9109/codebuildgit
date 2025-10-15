@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """
-Creates a new GitHub repository either in a user account or organization.
-Includes branch creation, team management, CODEOWNERS, CI workflow, and branch protection.
-Designed to run inside AWS CodeBuild.
+
 
 Requirements:
     pip install PyGithub
