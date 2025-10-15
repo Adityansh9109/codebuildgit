@@ -29,17 +29,17 @@ def create_branches(repo):
     branch_names = [b.strip() for b in branch_names_env.split(",") if b.strip()]
     
     if not branch_names:
-        print("⚠️ No additional branches to create")
+        print(" No branches provide to create")
         return
     
-    print(f"\n🌿 Creating branches: {', '.join(branch_names)}")
+    print(f"\n Creating branches: {', '.join(branch_names)}")
     
     try:
         default_branch = repo.default_branch
         source_branch = repo.get_branch(default_branch)
         source_sha = source_branch.commit.sha
         
-        print(f"📌 Using '{default_branch}' (SHA: {source_sha[:7]}) as base branch")
+        print(f" Using '{default_branch}' (SHA: {source_sha[:7]}) as base branch")
         time.sleep(2)
         
         for branch_name in branch_names:
@@ -48,17 +48,17 @@ def create_branches(repo):
                     ref=f"refs/heads/{branch_name}",
                     sha=source_sha
                 )
-                print(f"  ✅ Branch '{branch_name}' created successfully")
+                print(f"   Branch '{branch_name}' created successfully")
             except GithubException as e:
                 if e.status == 422:
-                    print(f"  ⚠️ Branch '{branch_name}' already exists")
+                    print(f"   Branch '{branch_name}' already exists")
                 else:
-                    print(f"  ❌ Failed to create branch '{branch_name}': {e.data if hasattr(e,'data') else e}")
+                    print(f"   Failed to create branch '{branch_name}': {e.data if hasattr(e,'data') else e}")
         
-        print(f"🎉 Branch creation completed!")
+        print(f" Branch creation completed!")
         
     except GithubException as e:
-        print(f"❌ Error during branch creation: {e.data if hasattr(e,'data') else e}")
+        print(f" Error during branch creation: {e.data if hasattr(e,'data') else e}")
 
 
 def create_teams_and_add_members(org, repo, users):
@@ -68,10 +68,10 @@ def create_teams_and_add_members(org, repo, users):
     - l2: All users, push access
     """
     if not users:
-        print("\n⚠️ No users provided. Skipping team creation.")
+        print("\n No users provided. Skipping team creation.")
         return
     
-    print(f"\n👥 Creating teams and adding members...")
+    print(f"\n Creating teams and adding members...")
     
     teams_config = [
         {'name': 'l1', 'members': [users[0]] if users else []},
@@ -97,30 +97,30 @@ def create_teams_and_add_members(org, repo, users):
                     name=team_name,
                     privacy="closed"
                 )
-                print(f"  ✅ Team '{team_name}' created")
+                print(f"   Team '{team_name}' created")
             
             # Grant team access to repository
             team.add_to_repos(repo)
             team.set_repo_permission(repo, "push")
-            print(f"  ✅ Team '{team_name}' granted push access to repository")
+            print(f"   Team '{team_name}' granted push access to repository")
             
             # Add members to team
             for username in members:
                 try:
                     team.add_membership(username, role="member")
-                    print(f"  ✅ Added user '{username}' to team '{team_name}'")
+                    print(f"   Added user '{username}' to team '{team_name}'")
                 except GithubException as e:
-                    print(f"  ❌ Failed to add '{username}' to '{team_name}': {e.data if hasattr(e,'data') else e}")
+                    print(f"   Failed to add '{username}' to '{team_name}': {e.data if hasattr(e,'data') else e}")
         
         except GithubException as e:
-            print(f"  ❌ Failed to create/configure team '{team_name}': {e.data if hasattr(e,'data') else e}")
+            print(f"   Failed to create/configure team '{team_name}': {e.data if hasattr(e,'data') else e}")
 
 
 def add_codeowners(repo, org_name):
     """
     Adds CODEOWNERS file with branch-specific ownership rules.
     """
-    print(f"\n📝 Adding CODEOWNERS file...")
+    print(f"\n Adding CODEOWNERS file...")
     
     codeowners_content = f"""# Branch-specific ownership
 /dev/* @{org_name}/l1
@@ -143,7 +143,7 @@ def add_codeowners(repo, org_name):
                 sha=contents.sha,
                 branch=default_branch
             )
-            print(f"  ✅ CODEOWNERS file updated")
+            print(f"   CODEOWNERS file updated")
         except GithubException:
             # File doesn't exist, create it
             repo.create_file(
@@ -152,17 +152,17 @@ def add_codeowners(repo, org_name):
                 content=codeowners_content,
                 branch=default_branch
             )
-            print(f"  ✅ CODEOWNERS file created")
+            print(f"   CODEOWNERS file created")
     
     except GithubException as e:
-        print(f"  ❌ Failed to add CODEOWNERS: {e.data if hasattr(e,'data') else e}")
+        print(f"   Failed to add CODEOWNERS: {e.data if hasattr(e,'data') else e}")
 
 
 def add_ci_workflow(repo):
     """
     Adds GitHub Actions CI workflow to all branches.
     """
-    print(f"\n⚙️ Adding CI workflow...")
+    print(f"\n Adding CI workflow...")
     
     workflow_content = """name: build
 
@@ -184,7 +184,7 @@ jobs:
           echo "🔨 Build started"
           echo "Running tests..."
           # Add your actual build/test commands here
-          echo "✅ Build completed successfully"
+          echo " Build completed successfully"
       
       - name: Build status
         run: echo "Build passed for commit ${{ github.sha }}"
@@ -204,7 +204,7 @@ jobs:
                 sha=contents.sha,
                 branch=default_branch
             )
-            print(f"  ✅ CI workflow updated on '{default_branch}'")
+            print(f"   CI workflow updated on '{default_branch}'")
         except GithubException:
             repo.create_file(
                 path=file_path,
@@ -212,7 +212,7 @@ jobs:
                 content=workflow_content,
                 branch=default_branch
             )
-            print(f"  ✅ CI workflow added to '{default_branch}'")
+            print(f"   CI workflow added to '{default_branch}'")
         
         # Sync to other branches (dev, qa)
         time.sleep(2)
@@ -239,9 +239,9 @@ jobs:
                         content=file_content.decoded_content.decode('utf-8'),
                         branch=branch_name
                     )
-                print(f"  ✅ CI workflow synced to '{branch_name}'")
+                print(f"   CI workflow synced to '{branch_name}'")
             except GithubException as e:
-                print(f"  ⚠️ Could not sync to '{branch_name}': {e.data if hasattr(e,'data') else e}")
+                print(f"   Could not sync to '{branch_name}': {e.data if hasattr(e,'data') else e}")
     
     except GithubException as e:
         print(f"  ❌ Failed to add CI workflow: {e.data if hasattr(e,'data') else e}")
@@ -251,7 +251,7 @@ def enable_branch_protection(repo):
     """
     Enables branch protection rules for dev, qa, and main branches.
     """
-    print(f"\n🔒 Enabling branch protection...")
+    print(f"\n Enabling branch protection...")
     
     protections = [
         {"branch": "dev", "review_count": 1, "code_owner": True},
@@ -270,12 +270,12 @@ def enable_branch_protection(repo):
                 require_code_owner_reviews=protection["code_owner"],
                 required_approving_review_count=protection["review_count"]
             )
-            print(f"  ✅ Branch protection enabled for '{branch_name}' ({protection['review_count']} reviews required)")
+            print(f"   Branch protection enabled for '{branch_name}' ({protection['review_count']} reviews required)")
         except GithubException as e:
             if e.status == 404:
-                print(f"  ⚠️ Branch '{branch_name}' not found, skipping protection")
+                print(f"   Branch '{branch_name}' not found, skipping protection")
             else:
-                print(f"  ❌ Failed to protect '{branch_name}': {e.data if hasattr(e,'data') else e}")
+                print(f"   Failed to protect '{branch_name}': {e.data if hasattr(e,'data') else e}")
 
 
 def main():
@@ -285,12 +285,12 @@ def main():
     users_env = os.getenv("USERS", "")
 
     if not all([github_token, owner_name, repo_name]):
-        print("❌ Missing environment variables: GITHUB_TOKEN, OWNER_NAME, REPO_NAME")
+        print(" Missing environment variables: GITHUB_TOKEN, OWNER_NAME, REPO_NAME")
         return
 
     users = [u.strip() for u in users_env.split(",") if u.strip()] if users_env else []
 
-    print(f"🔐 Connecting to GitHub with token...")
+    print(f" Connecting to GitHub with token...")
     g = Github(auth=Auth.Token(github_token))
     
     authenticated_user = g.get_user()
@@ -301,31 +301,31 @@ def main():
         owner = g.get_organization(owner_name)
         owner_type = "organization"
         is_organization = True
-        print(f"✅ Owner detected as organization: {owner_name}")
+        print(f" Owner detected as organization: {owner_name}")
         target = owner
     except GithubException:
         try:
             owner = g.get_user(owner_name)
             owner_type = "user"
-            print(f"✅ Owner detected as user: {owner_name}")
+            print(f" Owner detected as user: {owner_name}")
             
             if owner.login != authenticated_user.login:
-                print(f"❌ Cannot create repository for user '{owner_name}' - token belongs to '{authenticated_user.login}'")
+                print(f" Cannot create repository for user '{owner_name}' - token belongs to '{authenticated_user.login}'")
                 return
             
             target = authenticated_user
         except GithubException as e:
-            print(f"❌ Failed to access owner '{owner_name}': {e.data if hasattr(e,'data') else e}")
+            print(f" Failed to access owner '{owner_name}': {e.data if hasattr(e,'data') else e}")
             return
 
     # Check if repo already exists
     try:
         existing_repos = [r.name for r in target.get_repos()]
         if repo_name in existing_repos:
-            print(f"⚠️ Repository '{repo_name}' already exists under {owner_type} '{owner_name}'. Skipping creation.")
+            print(f" Repository '{repo_name}' already exists under {owner_type} '{owner_name}'. Skipping creation.")
             return
     except GithubException as e:
-        print(f"⚠️ Could not check existing repositories: {e.data if hasattr(e,'data') else e}")
+        print(f" Could not check existing repositories: {e.data if hasattr(e,'data') else e}")
 
     # Create repository
     try:
@@ -335,8 +335,8 @@ def main():
             private=False,
             auto_init=True
         )
-        print(f"🚀 Repository '{repo_name}' created successfully under {owner_type} '{owner_name}'")
-        print(f"🔗 Repository URL: {repo.html_url}")
+        print(f" Repository '{repo_name}' created successfully under {owner_type} '{owner_name}'")
+        print(f" Repository URL: {repo.html_url}")
         
         # Wait for repository initialization
         time.sleep(3)
@@ -353,7 +353,7 @@ def main():
             # Add CODEOWNERS file
             add_codeowners(repo, owner_name)
         else:
-            print("\n⚠️ Teams and CODEOWNERS are only available for organizations")
+            print("\n Teams and CODEOWNERS are only available for organizations")
         
         # Add CI workflow (works for both org and user)
         add_ci_workflow(repo)
@@ -361,10 +361,10 @@ def main():
         # Enable branch protection (works for both org and user)
         enable_branch_protection(repo)
         
-        print("\n✅ Repository setup completed successfully!")
+        print("\n Repository setup completed successfully!")
         
     except GithubException as e:
-        print(f"❌ Failed to create repository: {e.data if hasattr(e,'data') else e}")
+        print(f" Failed to create repository: {e.data if hasattr(e,'data') else e}")
 
 if __name__ == "__main__":
     main()
