@@ -2,7 +2,7 @@ version: 0.2
 env:
   variables:
     OWNER_NAME: "Adityansh9109"              # Organization name
-    REPO_NAME: "codebuild29-10-final-gitdif"
+    REPO_NAME: "codebuild29-10-final-gitdiff"
     BRANCH_NAMES: "dev,qa"                 # Branches to create
     USERS: "AdityanshShamra"             # GitHub usernames
   secrets-manager:
