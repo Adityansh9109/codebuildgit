@@ -16,26 +16,33 @@ phases:
       - echo "Installing dependencies..."
       - pip install --upgrade pip
       - pip install PyGithub
-      - echo "Fetching latest Git updates..."
-      - git fetch origin
 
   pre_build:
     commands:
-      - echo "🔍 Checking for git differences..."
+      - echo "🔍 Checking if new code changes are present..."
       - |
-        git diff --quiet origin/$MAIN_BRANCH || GIT_CHANGED=$?
-        if [ "$GIT_CHANGED" = "1" ]; then
-          echo "✅ Changes detected — proceeding with deployment..."
+        # Try to detect git information if available
+        if [ -d .git ]; then
+          echo "Git repository found, checking diff..."
+          git diff --quiet || GIT_CHANGED=$?
         else
-          echo "🟡 No changes detected — skipping deployment."
+          echo "⚠️ No .git directory found (artifact from CodePipeline)."
+          echo "Assuming source has changed since pipeline triggered."
+          GIT_CHANGED=1
+        fi
+
+        if [ "$GIT_CHANGED" = "1" ]; then
+          echo "✅ Changes detected — continuing with deployment..."
+        else
+          echo "🟡 No code changes detected — skipping deployment."
           exit 0
         fi
 
   build:
     commands:
-      - echo "Running create_repo.py..."
+      - echo "🚀 Running create_repo.py..."
       - python create_repo.py
 
   post_build:
     commands:
-      - echo "✅ Repository creation completed."
+      - echo "✅ Repository creation completed successfully."
