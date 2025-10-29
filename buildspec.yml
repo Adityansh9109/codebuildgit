@@ -2,7 +2,7 @@ version: 0.2
 env:
   variables:
     OWNER_NAME: "Adityansh9109"              # Organization name
-    REPO_NAME: "codebuild29-10-final-gitdiff"
+    REPO_NAME: "codebuild29-10-final-gitdiff-2"
     BRANCH_NAMES: "dev,qa"                 # Branches to create
     USERS: "AdityanshShamra"             # GitHub usernames
   secrets-manager:
@@ -16,6 +16,20 @@ phases:
       - echo "Installing dependencies..."
       - pip install --upgrade pip
       - pip install PyGithub
+      - echo "Fetching latest Git updates..."
+      - git fetch origin
+
+  pre_build:
+    commands:
+      - echo "🔍 Checking for git differences..."
+      - |
+        git diff --quiet origin/$MAIN_BRANCH || GIT_CHANGED=$?
+        if [ "$GIT_CHANGED" = "1" ]; then
+          echo "✅ Changes detected — proceeding with deployment..."
+        else
+          echo "🟡 No changes detected — skipping deployment."
+          exit 0
+        fi
 
   build:
     commands:
